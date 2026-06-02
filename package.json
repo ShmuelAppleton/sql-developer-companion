@@ -1,0 +1,255 @@
+{
+  "name": "sql-developer-companion",
+  "displayName": "SQL Developer Companion",
+  "description": "Companion utilities for Oracle SQL Developer in VS Code",
+  "version": "1.1.2",
+  "publisher": "shmuel-appleton",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShmuelAppleton/sql-developer-companion"
+  },
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "oracle",
+    "sql developer",
+    "database",
+    "recent objects",
+    "plsql",
+    "navigation",
+    "go to definition",
+    "peek",
+    "connection",
+    "color",
+    "tabs"
+  ],
+  "extensionDependencies": [
+    "Oracle.sql-developer"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onLanguage:oracle-sql",
+    "workspaceContains:**/*.{pks,pkb,sql,pls,plb,pck}"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sqlDevCompanion.reopenRecent",
+        "title": "Reopen Recent Oracle Object",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.clearHistory",
+        "title": "Clear Recent Oracle Objects History",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.goToLocal",
+        "title": "Go to Local Definition",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.showPlsqlStats",
+        "title": "Show PL/SQL Index Statistics",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.reindexPlsql",
+        "title": "Re-index PL/SQL Workspace",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.clearHighlight",
+        "title": "Clear Statement Highlight",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.refreshBadges",
+        "title": "Refresh Connection Badges",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.setBadge",
+        "title": "Set Connection Badge...",
+        "category": "SQL Developer Companion"
+      },
+      {
+        "command": "sqlDevCompanion.setWorkspaceColor",
+        "title": "Set Workspace Color...",
+        "category": "SQL Developer Companion"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "sqlDevCompanion.goToLocal",
+        "key": "alt+f12",
+        "when": "editorTextFocus && editorLangId == oracle-sql"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "sqlDevCompanion.goToLocal",
+          "when": "editorLangId == oracle-sql",
+          "group": "navigation@1"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "sqlDevCompanion.setBadge",
+          "when": "view == sqldeveloper.connections && (viewItem in sqldeveloper.tree.closedConnectionTypes || viewItem in sqldeveloper.tree.openConnectionTypes)",
+          "group": "z_sqlDevCompanion@1"
+        },
+        {
+          "command": "sqlDevCompanion.setWorkspaceColor",
+          "when": "view == sqldeveloper.connections && (viewItem in sqldeveloper.tree.closedConnectionTypes || viewItem in sqldeveloper.tree.openConnectionTypes)",
+          "group": "z_sqlDevCompanion@2"
+        }
+      ]
+    },
+    "views": {
+      "sqldeveloper-explorer": [
+        {
+          "id": "sqlDevCompanion.recentObjects",
+          "name": "Recent Objects",
+          "type": "webview",
+          "when": "sqldeveloper.extension.isActivated"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "SQL Developer Companion",
+      "properties": {
+        "sqlDevCompanion.maxRecentItems": {
+          "type": "number",
+          "default": 50,
+          "description": "Maximum number of recent Oracle objects to remember"
+        },
+        "sqlDevCompanion.uriSchemes": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "URI schemes to track (leave empty to auto-detect Oracle schemes). Use this if auto-detection doesn't capture the right files."
+        },
+        "sqlDevCompanion.packageDefinitionTarget": {
+          "type": "string",
+          "default": "body",
+          "enum": ["body", "spec", "both"],
+          "enumDescriptions": [
+            "Navigate to package body (.pkb) - shows implementation",
+            "Navigate to package spec (.pks) - shows interface/signature",
+            "Show both package body and spec as definition options"
+          ],
+          "description": "Which package definition to navigate to when clicking on a package name or its procedures/functions"
+        },
+        "sqlDevCompanion.highlightExecutedStatement": {
+          "type": "boolean",
+          "default": false,
+          "description": "Highlight the SQL statement in the editor when query results are displayed"
+        },
+        "sqlDevCompanion.highlightStyle": {
+          "type": "string",
+          "default": "subtle",
+          "enum": ["subtle", "moderate", "bold", "border-only", "custom"],
+          "enumDescriptions": [
+            "Soft blue/gray background highlight",
+            "Medium blue background highlight",
+            "Strong orange/yellow highlight",
+            "No background color, only a colored left border",
+            "Use custom colors from highlightCustomBackground and highlightCustomBorder"
+          ],
+          "description": "Style preset for the executed statement highlight"
+        },
+        "sqlDevCompanion.highlightCustomBackground": {
+          "type": "string",
+          "default": "rgba(100, 150, 255, 0.15)",
+          "description": "Custom background color for statement highlight (used when highlightStyle is 'custom'). Accepts any CSS color value."
+        },
+        "sqlDevCompanion.highlightCustomBorder": {
+          "type": "string",
+          "default": "rgba(100, 150, 255, 0.5)",
+          "description": "Custom border color for statement highlight (used when highlightStyle is 'custom'). Accepts any CSS color value."
+        },
+        "sqlDevCompanion.colorTitleBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply connection colors to the title bar"
+        },
+        "sqlDevCompanion.colorActivityBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply connection colors to the activity bar (left sidebar icons)"
+        },
+        "sqlDevCompanion.colorStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Apply connection colors to the status bar"
+        },
+        "sqlDevCompanion.statusBarStyle": {
+          "type": "string",
+          "default": "background",
+          "enum": ["background", "border"],
+          "enumDescriptions": [
+            "Fill the entire status bar background with the connection color",
+            "Only show a colored border at the top of the status bar (less intrusive)"
+          ],
+          "description": "How to apply color to the status bar"
+        },
+        "sqlDevCompanion.recentObjectsOpenAsPreview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open recent objects in preview mode (italic tab title, replaced when opening another file). When false, files open as pinned editors."
+        },
+        "sqlDevCompanion.connectionRules": {
+          "type": "array",
+          "default": [],
+          "description": "Rules mapping connection names to badges and workspace colors. Set via right-click menu on connections.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "connectionName": {
+                "type": "string",
+                "description": "The connection name as defined in SQL Developer"
+              },
+              "badge": {
+                "type": "string",
+                "description": "Short badge text (1-2 characters/emojis) to show on tab",
+                "maxLength": 2
+              },
+              "workspaceColor": {
+                "type": "string",
+                "description": "Hex color for workspace (title bar, activity bar, status bar). Example: '#FF5252'",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            },
+            "required": ["connectionName"]
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@oracle/sql-developer-api": "^25.2.0"
+  }
+}
